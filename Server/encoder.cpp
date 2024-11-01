@@ -1,4 +1,5 @@
 #include "encoder.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -11,55 +12,42 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include "stopwatch.h"
-#include <unordered_map>
+#include <map>
 #include <vector>
 
+// Constants and placeholders
 #define NUM_PACKETS 8
-#define pipe_depth 4
+#define PIPE_DEPTH 4
 #define DONE_BIT_L (1 << 7)
 #define DONE_BIT_H (1 << 15)
-#define CHUNK_SIZE 1024
-#define HASH_TABLE_SIZE 1000
+
+#define MAX_CHUNK_SIZE 1024 // Placeholder max chunk size
+#define MIN_CHUNK_SIZE 512  // Placeholder min chunk size
 
 int offset = 0;
 unsigned char* file;
 
-struct Chunk {
-    unsigned char* data;
-    size_t size;
-};
-
-// Placeholder function for Content-Defined Chunking (CDC)
-void content_defined_chunking(unsigned char* data, size_t length, std::vector<Chunk>& chunks) {
-    size_t num_chunks = (length + CHUNK_SIZE - 1) / CHUNK_SIZE;
-    for (size_t i = 0; i < num_chunks; i++) {
-        Chunk chunk;
-        chunk.size = (i == num_chunks - 1) ? (length % CHUNK_SIZE) : CHUNK_SIZE;
-        chunk.data = (unsigned char*)malloc(chunk.size);
-        memcpy(chunk.data, &data[i * CHUNK_SIZE], chunk.size);
-        chunks.push_back(chunk);
-    }
-}
-
-// Placeholder for Deduplication using a simple hash table
-bool is_unique_chunk(const unsigned char* chunk_data, size_t size, std::unordered_map<size_t, bool>& dedup_table) {
-    size_t hash = 0;
-    for (size_t i = 0; i < size; i++) {
-        hash = (hash * 31 + chunk_data[i]) % 1000003;
-    }
-    if (dedup_table.find(hash) != dedup_table.end()) {
-        return false; // Duplicate chunk
-    } else {
-        dedup_table[hash] = true;
-        return true; // Unique chunk
-    }
-}
-
-// Placeholder function for LZW Encoding
-void lzw_encoding(const unsigned char* data, size_t length, std::vector<uint16_t>& encoded_data) {
+// Placeholder hash function: addition modulo 2^32
+uint32_t placeholder_hash(unsigned char* data, size_t length) {
+    uint32_t hash = 0;
     for (size_t i = 0; i < length; i++) {
-        encoded_data.push_back(static_cast<uint16_t>(data[i]));
+        hash += data[i];
     }
+    return hash;
+}
+
+// Placeholder CDC function
+size_t content_defined_chunking(unsigned char* data, size_t data_length, size_t chunk_start, size_t& chunk_length) {
+    // Placeholder: Fixed-size chunks for simplicity
+    chunk_length = std::min((size_t)MAX_CHUNK_SIZE, data_length - chunk_start);
+    return chunk_length;
+}
+
+// Placeholder LZW encoding (no actual compression)
+void lzw_encode(unsigned char* input_data, size_t input_size, unsigned char*& output_data, size_t& output_size) {
+    // Placeholder: No compression, just pass data through
+    output_data = input_data;
+    output_size = input_size;
 }
 
 void handle_input(int argc, char* argv[], int* blocksize) {
@@ -88,55 +76,77 @@ int main(int argc, char* argv[]) {
     int count = 0;
     ESE532_Server server;
 
+    // default is 2k
     int blocksize = BLOCKSIZE;
 
+    // set blocksize if declared through command line
     handle_input(argc, argv, &blocksize);
 
-    file = (unsigned char*)malloc(sizeof(unsigned char) * 70000000);
+    file = (unsigned char*) malloc(sizeof(unsigned char) * 70000000);
     if (file == NULL) {
-        printf("Memory allocation failed\n");
+        printf("Memory allocation failed for file buffer\n");
         return 1;
     }
 
     for (int i = 0; i < NUM_PACKETS; i++) {
-        input[i] = (unsigned char*)malloc(sizeof(unsigned char) * (NUM_ELEMENTS + HEADER));
+        input[i] = (unsigned char*) malloc(sizeof(unsigned char) * (NUM_ELEMENTS + HEADER));
         if (input[i] == NULL) {
-            std::cout << "Memory allocation failed" << std::endl;
+            std::cout << "Memory allocation failed for input buffer" << std::endl;
             return 1;
         }
     }
 
     server.setup_server(blocksize);
 
-    writer = pipe_depth;
+    writer = PIPE_DEPTH;
     server.get_packet(input[writer]);
     count++;
 
-    std::unordered_map<size_t, bool> dedup_table;
-
+    // get packet
     unsigned char* buffer = input[writer];
+
+    // decode
     done = buffer[1] & DONE_BIT_L;
     length = buffer[0] | (buffer[1] << 8);
     length &= ~DONE_BIT_H;
+    // printing takes time so be wary of transfer rate
+    // printf("length: %d offset %d\n", length, offset);
 
-    std::vector<Chunk> chunks;
-    content_defined_chunking(&buffer[HEADER], length, chunks);
+    // Placeholder processing
+    size_t chunk_start = 0;
+    size_t chunk_length = 0;
 
-    for (auto& chunk : chunks) {
-        if (is_unique_chunk(chunk.data, chunk.size, dedup_table)) {
-            std::vector<uint16_t> encoded_data;
-            lzw_encoding(chunk.data, chunk.size, encoded_data);
+    // Process the received buffer
+    while (chunk_start < length) {
+        // Content-Defined Chunking
+        content_defined_chunking(&buffer[HEADER], length, chunk_start, chunk_length);
 
-            for (auto& code : encoded_data) {
-                memcpy(&file[offset], &code, sizeof(uint16_t));
-                offset += sizeof(uint16_t);
-            }
-        }
-        free(chunk.data);
+        unsigned char* chunk_data = &buffer[HEADER + chunk_start];
+
+        // Compute placeholder hash
+        uint32_t chunk_hash = placeholder_hash(chunk_data, chunk_length);
+
+        // Placeholder deduplication (simple hash map)
+        // For simplicity, we're not implementing an actual deduplication mechanism here
+        // In practice, you would check if the chunk_hash exists and handle duplicates
+
+        // Placeholder LZW Encoding
+        unsigned char* compressed_data = nullptr;
+        size_t compressed_size = 0;
+        lzw_encode(chunk_data, chunk_length, compressed_data, compressed_size);
+
+        // Store the processed chunk into the file buffer
+        memcpy(&file[offset], compressed_data, compressed_size);
+        offset += compressed_size;
+
+        chunk_start += chunk_length;
     }
+
     writer++;
 
+    // Process remaining packets
     while (!done) {
+        // reset ring buffer
         if (writer == NUM_PACKETS) {
             writer = 0;
         }
@@ -147,31 +157,55 @@ int main(int argc, char* argv[]) {
 
         count++;
 
+        // get packet
         unsigned char* buffer = input[writer];
+
+        // decode
         done = buffer[1] & DONE_BIT_L;
         length = buffer[0] | (buffer[1] << 8);
         length &= ~DONE_BIT_H;
+        // printf("length: %d offset %d\n", length, offset);
 
-        content_defined_chunking(&buffer[HEADER], length, chunks);
+        // Placeholder processing
+        chunk_start = 0;
+        chunk_length = 0;
 
-        for (auto& chunk : chunks) {
-            if (is_unique_chunk(chunk.data, chunk.size, dedup_table)) {
-                std::vector<uint16_t> encoded_data;
-                lzw_encoding(chunk.data, chunk.size, encoded_data);
+        // Process the received buffer
+        while (chunk_start < length) {
+            // Content-Defined Chunking
+            content_defined_chunking(&buffer[HEADER], length, chunk_start, chunk_length);
 
-                for (auto& code : encoded_data) {
-                    memcpy(&file[offset], &code, sizeof(uint16_t));
-                    offset += sizeof(uint16_t);
-                }
-            }
-            free(chunk.data);
+            unsigned char* chunk_data = &buffer[HEADER + chunk_start];
+
+            // Compute placeholder hash
+            uint32_t chunk_hash = placeholder_hash(chunk_data, chunk_length);
+
+            // Placeholder deduplication (simple hash map)
+            // For simplicity, we're not implementing an actual deduplication mechanism here
+
+            // Placeholder LZW Encoding
+            unsigned char* compressed_data = nullptr;
+            size_t compressed_size = 0;
+            lzw_encode(chunk_data, chunk_length, compressed_data, compressed_size);
+
+            // Store the processed chunk into the file buffer
+            memcpy(&file[offset], compressed_data, compressed_size);
+            offset += compressed_size;
+
+            chunk_start += chunk_length;
         }
+
         writer++;
     }
 
+    // write file to root and you can use diff tool on board
     FILE *outfd = fopen("output_cpu.bin", "wb");
+    if (outfd == NULL) {
+        perror("Error opening output file");
+        return 1;
+    }
     int bytes_written = fwrite(&file[0], 1, offset, outfd);
-    printf("File written with %d bytes\n", bytes_written);
+    printf("write file with %d bytes\n", bytes_written);
     fclose(outfd);
 
     for (int i = 0; i < NUM_PACKETS; i++) {
