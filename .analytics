@@ -1,0 +1,7 @@
+timestamp=[2024-11-05 21:32:36], mode=WORKBENCH_START, duration=0:00:03.016, duration_ms=3016, data={}
+timestamp=[2024-11-05 21:32:37], mode=WORKBENCH_UI_INIT, duration=0:00:00.363, duration_ms=363, data={editors_count=0, platform_editors_count=0, projects_count=0, platform_projects_count=0, active_platform_editor=false, projects=}
+timestamp=[2024-11-05 21:32:40], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:03.409, duration_ms=3409, data={}
+timestamp=[2024-11-05 21:40:30], mode=APP_CREATION, duration=0:00:02.147, duration_ms=2147, data={name=bloom, project_type=sdk, os=linux, processor=cortex-a53, runtime=OpenCL, platform=u96v2_sbc_base, application_type=application}
+timestamp=[2024-11-05 21:46:48], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:00.825, duration_ms=825, data={}
+timestamp=[2024-11-05 21:46:48], mode=WORKBENCH_START, duration=0:00:06.241, duration_ms=6241, data={}
+timestamp=[2024-11-05 21:46:49], mode=WORKBENCH_UI_INIT, duration=0:00:00.303, duration_ms=303, data={editors_count=2, platform_editors_count=0, projects_count=5, platform_projects_count=0, active_platform_editor=false, projects=RemoteSystemsTempFiles,bloom,bloom_kernels,bloom_system,bloom_system_hw_link}

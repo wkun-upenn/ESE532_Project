@@ -1,0 +1,91 @@
+/*
+
+Xilinx Vitis v2020.2.0 (64-bit) [Major: 2020, Minor: 2]
+SW Build 3064172 on 2020-11-18-06:24:19
+
+Process ID (PID): 3460
+License: Customer
+
+Current time: 	Tue Nov 05 21:02:45 EST 2024
+Time zone: 	Eastern Standard Time (America/New_York)
+
+OS: NAME="openSUSE Leap"
+OS Version: 6.4.0-150600.23.25-default
+OS Architecture: amd64
+Available processors (cores): 20
+
+Display: :0
+Screen size: 1920x1080
+Available screens: 1
+Available disk space: 805 GB
+
+Java version: 	11.0.2 64-bit
+Java home: 	/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2
+Java executable location: 	/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/bin/java
+Java initial memory (-Xms): 	64 MB
+Java maximum memory (-Xmx):	 1,024 MB
+
+Java library paths: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/javafx-sdk-11.0.2/lib:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o/SuSE:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/lib/:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/lib//server:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o/SuSE:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/python-3.8.3/lib:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/bin/../lnx64/tools/dot/lib:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+
+Java class paths: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/eclipse/lnx64.o//plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar
+LD_LIBRARY_PATH: /mnt/pollux/software/xilinx/2020.2/Vitis
+
+User name: 	wkun
+User home directory: /mnt/castor/seas_home/w/wkun
+User working directory: /mnt/castor/seas_home/w/wkun/ese532_code/project
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /mnt/pollux/software/xilinx/2020.2/Vitis
+HDI_APPROOT: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+RDI_DATADIR: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/data
+RDI_BINDIR: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/bin
+
+Vitis preferences directory: /mnt/castor/seas_home/w/wkun/.Xilinx/Vitis/2020.2/
+Vitis workspace directory: /mnt/castor/seas_home/w/wkun/workspace
+Vitis workspace log file location: /mnt/castor/seas_home/w/wkun/workspace/.metadata/.log
+Engine tmp dir: 	
+
+Xilinx Environment Variables
+----------------------------
+SDK_HOME: /usr/lib64/jvm/java-17-openjdk-17
+XILINXD_LICENSE_FILE: /mnt/pollux/software/xilinx/.Xilinx/
+XILINX_DSP: 
+XILINX_HLS: /mnt/pollux/software/xilinx/2020.2/Vitis_HLS/2020.2
+XILINX_PLANAHEAD: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_SDK: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_VITIS: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_VIVADO: /mnt/pollux/software/xilinx/2020.2/Vivado/2020.2
+XILINX_VIVADO_HLS: /mnt/pollux/software/xilinx/2020.2/Vivado/2020.2
+_RDI_DONT_SET_XILINX_AS_PATH: True
+
+
+Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+selectTreeTable("test.prj", "test_system > test", EventType.DOUBLE_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectHyperlink("test", "test", "SDXSettingsEditor", "Hyperlink.TEST");
+selectIconButton("Show In System Explorer", "Properties for test", "PropertyDialog", "Button.SHOW_IN_SYSTEM_EXPLORER");
+selectToolBarButton("XSCT Console", "test", "WorkbenchWindow", "ToolItem.XSCT_CONSOLE");
+activateView("XSCT Console", "XSDBConsoleView", "CTabItem.XSCT_CONSOLE");
+selectToolBarButton("Minimize", "XSCT Console", "XSDBConsoleView", "ToolItem.MINIMIZE");
+selectCombo("Emulation-SW", "test", "SDXSettingsEditor", "ComboViewer.ArrayContentProvider");
+selectCombo("Hardware", "test", "SDXSettingsEditor", "ComboViewer.ArrayContentProvider");
+selectCheckBox("When enabled host code will be compiled with debug", Boolean.FALSE, "test", "SDXSettingsEditor", "Button.WHEN_ENABLED_HOST");
+selectCheckBox("When enabled host code will be compiled with debug", Boolean.TRUE, "test", "SDXSettingsEditor", "Button.WHEN_ENABLED_HOST");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("test.prj", "test_system > test", EventType.POPUP_TRIGGER_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectMenuItem("Rename", "Explorer", "ProjectExplorer", "MenuItem.RENAME");
+selectHyperlink("test", "test", "SDXSettingsEditor", "Hyperlink.TEST");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectMenuItem("File", "test", "WorkbenchWindow", "MenuItem.FILE");
+selectMenuItem("Switch Workspace", "test", "WorkbenchWindow", "MenuItem.SWITCH_WORKSPACE");
+selectMenuItem("Other", "test", "WorkbenchWindow", "MenuItem.OTHER");
+setCombo("/mnt/castor/seas_home/w/wkun", "Vitis IDE Launcher", "ChooseWorkspaceWithSettingsAndRestoreDialog", "Combo");
+selectButton("Browse", "Vitis IDE Launcher", "ChooseWorkspaceWithSettingsAndRestoreDialog", "Button.BROWSE");
+selectButton("Launch", "Vitis IDE Launcher", "ChooseWorkspaceWithSettingsAndRestoreDialog", "Button.LAUNCH");
+// Exiting Xilinx Vitis with a status code '0' at 11/5/24, 9:32:30 PM EST
+// Elapsed time: 00:29:44
+

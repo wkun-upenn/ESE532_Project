@@ -1,223 +1,302 @@
-#include "encoder.h"
+// encoder.cpp
 
+#include "server.h"
+#include "common.h"
+
+#include <fstream>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include "server.h"
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+#include <string>
 #include <unistd.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <errno.h>
 #include <sys/mman.h>
 #include "stopwatch.h"
-#include <map>
-#include <vector>
 
-// Constants and placeholders
+// Constants
 #define NUM_PACKETS 8
-#define PIPE_DEPTH 4
+#define pipe_depth 4
 #define DONE_BIT_L (1 << 7)
 #define DONE_BIT_H (1 << 15)
 
-#define MAX_CHUNK_SIZE 1024 // Placeholder max chunk size
-#define MIN_CHUNK_SIZE 512  // Placeholder min chunk size
+#define NUM_ELEMENTS 16384
+#define BLOCKSIZE_ENC 8192//2048
+#define HEADER 2
 
+// Global Variables
 int offset = 0;
-unsigned char* file;
+unsigned char* file_buffer;
 
-// Placeholder hash function: addition modulo 2^32
-uint32_t placeholder_hash(unsigned char* data, size_t length) {
-    uint32_t hash = 0;
-    for (size_t i = 0; i < length; i++) {
-        hash += data[i];
+void append_uint32_le(std::vector<uint8_t>& buffer, uint32_t value) {
+    buffer.push_back(static_cast<uint8_t>(value & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 8) & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 16) & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 24) & 0xFF));
+}
+
+void append_uint16_le(std::vector<uint8_t>& buffer, uint16_t value) {
+    buffer.push_back(static_cast<uint8_t>(value & 0xFF));
+    buffer.push_back(static_cast<uint8_t>((value >> 8) & 0xFF));
+}
+
+void save_to_text_file(const unsigned char* data, size_t data_size, const std::string& output_filename) {
+    // Open the output file in binary mode
+    std::ofstream output_file(output_filename, std::ios::binary);
+    if (!output_file) {
+        std::cerr << "Error: Could not open file " << output_filename << " for writing." << std::endl;
+        return;
     }
-    return hash;
-}
 
-// Placeholder CDC function
-size_t content_defined_chunking(unsigned char* data, size_t data_length, size_t chunk_start, size_t& chunk_length) {
-    // Placeholder: Fixed-size chunks for simplicity
-    chunk_length = std::min((size_t)MAX_CHUNK_SIZE, data_length - chunk_start);
-    return chunk_length;
-}
+    // Write the data to the file
+    output_file.write(reinterpret_cast<const char*>(data), data_size);
+    output_file.close();
 
-// Placeholder LZW encoding (no actual compression)
-void lzw_encode(unsigned char* input_data, size_t input_size, unsigned char*& output_data, size_t& output_size) {
-    // Placeholder: No compression, just pass data through
-    output_data = input_data;
-    output_size = input_size;
+    if (output_file) {
+        std::cout << "Successfully wrote " << data_size << " bytes to " << output_filename << std::endl;
+    } else {
+        std::cerr << "Error: Failed to write data to " << output_filename << std::endl;
+    }
 }
 
 void handle_input(int argc, char* argv[], int* blocksize) {
-    int x;
-    extern char *optarg;
-
-    while ((x = getopt(argc, argv, ":b:")) != -1) {
-        switch (x) {
-        case 'b':
-            *blocksize = atoi(optarg);
-            printf("blocksize is set to %d optarg\n", *blocksize);
-            break;
-        case ':':
-            printf("-%c without parameter\n", optopt);
-            break;
+    int option;
+    while ((option = getopt(argc, argv, ":b:")) != -1) {
+        switch (option) {
+            case 'b':
+                *blocksize = atoi(optarg);
+                printf("Blocksize is set to %d\n", *blocksize);
+                break;
+            case ':':
+                fprintf(stderr, "Option -%c requires a parameter\n", optopt);
+                break;
+            default:
+                fprintf(stderr, "Usage: %s [-b blocksize]\n", argv[0]);
         }
     }
 }
 
+bool process_packet(unsigned char* file, int& offset, 
+                    std::unordered_map<std::string, std::vector<unsigned char>>& lzw_cache,//std::vector<int>>& lzw_cache,
+                    std::unordered_set<std::string>& hash_table) {
+    // Initial size before processing
+    size_t original_size = offset;
+    
+    // Step 1: Perform Content-Defined Chunking
+    std::vector<size_t> chunk_positions;
+    content_defined_chunking(file, offset, chunk_positions);
+    size_t chunk_count = (chunk_positions.empty()) ? 0 : chunk_positions.size() - 1;
+    std::cout << "CDC function called: chunk_count = " << chunk_count << std::endl;
+    
+    size_t cdc_size = offset; // Size remains the same as CDC just marks chunk positions
+
+    // Step 2: SHA-256 -> Deduplication or LZW for each chunk
+    uint64_t dedup_size = 0;
+    uint64_t lzw_compressed_size = 0;
+    uint64_t lzw_before = 0;
+    uint64_t dedup_before = 0;
+    for (size_t i = 0; i < chunk_count; i++) {
+        uint32_t start = chunk_positions[i];
+        uint32_t end = chunk_positions[i + 1];
+        uint32_t chunk_size = end - start;
+        unsigned char* chunk = file + start;
+
+        // Compute SHA-256 hash of the chunk
+        std::string hash_value = sha256_hash_string(chunk, chunk_size);
+
+        if (dedup(hash_table, hash_value)) {
+            dedup_before += chunk_size;
+            // Hash found in table, reuse cached LZW data
+            const std::vector<unsigned char>& cached_data = lzw_cache[hash_value];
+            //std::cout << "Hash found in lzw_cache with size" << lzw_cache[hash_value].size() << "\n";
+            uint32_t cached_size = cached_data.size();
+            //std::cout << "Duplicate chunk found. Reusing cached compressed data, size = " << cached_data.size() << "bytes \n";
+            dedup_size += cached_size;  // Add size of reused chunk to dedup size
+            // Check total byte size of cached_data
+            size_t cached_byte_size = cached_data.size() * sizeof(unsigned char);
+            //std::cout << "Cached data byte size: " << cached_byte_size << " bytes\n";
+            // Ensure buffer does not overflow
+            if (offset + cached_size < 70000000) {
+                memcpy(&file[offset], cached_data.data(), cached_size);
+                offset += cached_size;
+            } else {
+                std::cerr << "File buffer overflow!" << std::endl;
+                return false;
+            }
+        } else {
+            // New chunk, perform LZW compression
+            uint32_t lzw_codes[16384]; // Adjust size as needed
+            uint32_t code_length = 0;
+            uint8_t failure = 0;
+            size_t lzw_size = chunk.size();
+            unsigned int associative_mem = 0;
+            lzw_before += chunk_size;
+            // New chunk, perform LZW compression
+            lzw_encode(chunk, );
+
+            std::vector<uint8_t> compressed_data;
+            for (size_t j = 0; j < code_length; ++j) {
+                uint16_t code = static_cast<uint16_t>(lzw_codes[j]);
+                compressed_data.push_back((code >> 8) & 0xFF);
+                compressed_data.push_back(code & 0xFF);
+            }
+            uint32_t compressed_size = compressed_data.size();  
+            std::cout << "Compressed chunk with size = " << compressed_data.size() << " bytes \n";
+            lzw_compressed_size += compressed_size;  // Track the LZW compressed size   
+            lzw_cache[hash_value] = compressed_data;
+        }
+    }
+
+    std::cout << "Compression ratio (compared to orginal file size): " << (lzw_before / (static_cast<float>(original_size))) << std::endl;
+
+    return true;
+}
+
 int main(int argc, char* argv[]) {
+    if (argc <= 2) {
+        std::cerr << "Using " << argv[1] << " as output file name." << std::endl;
+    }
+    const char* output_filename = argv[1]; // Take the output file name from the command line
+
     stopwatch ethernet_timer;
-    unsigned char* input[NUM_PACKETS];
+    unsigned char* input_buffers[NUM_PACKETS];
     int writer = 0;
     int done = 0;
     int length = 0;
-    int count = 0;
+    int count = 0; // If 'count' is unused, consider removing or using it
+    int blocksize = BLOCKSIZE_ENC; // Fixed macro name
     ESE532_Server server;
 
-    // default is 2k
-    int blocksize = BLOCKSIZE;
-
-    // set blocksize if declared through command line
+    // Handle command-line input
     handle_input(argc, argv, &blocksize);
 
-    file = (unsigned char*) malloc(sizeof(unsigned char) * 70000000);
-    if (file == NULL) {
-        printf("Memory allocation failed for file buffer\n");
+    // Allocate memory for the file buffer
+    file_buffer = (unsigned char*) malloc(sizeof(unsigned char) * 70000000);
+    if (file_buffer == NULL) {
+        std::cerr << "Failed to allocate memory for file buffer.\n";
         return 1;
     }
 
+    // Allocate memory for input buffers
     for (int i = 0; i < NUM_PACKETS; i++) {
-        input[i] = (unsigned char*) malloc(sizeof(unsigned char) * (NUM_ELEMENTS + HEADER));
-        if (input[i] == NULL) {
-            std::cout << "Memory allocation failed for input buffer" << std::endl;
+        input_buffers[i] = (unsigned char*) malloc(sizeof(unsigned char) * (NUM_ELEMENTS + HEADER));
+        if (input_buffers[i] == NULL) {
+            std::cerr << "Failed to allocate memory for input buffer " << i << std::endl;
+            // Free previously allocated buffers
+            for (int j = 0; j < i; j++) {
+                free(input_buffers[j]);
+            }
+            free(file_buffer);
             return 1;
         }
     }
 
+    // Setup the server
     server.setup_server(blocksize);
+	writer = pipe_depth;
+	server.get_packet(input_buffers[writer]);
+	count++;
 
-    writer = PIPE_DEPTH;
-    server.get_packet(input[writer]);
-    count++;
+	// get packet
+	unsigned char* buffer = input_buffers[writer];
 
-    // get packet
-    unsigned char* buffer = input[writer];
+	// decode
+	done = buffer[1] & DONE_BIT_L;
+	length = buffer[0] | (buffer[1] << 8);
+	length &= ~DONE_BIT_H;
 
-    // decode
-    done = buffer[1] & DONE_BIT_L;
-    length = buffer[0] | (buffer[1] << 8);
-    length &= ~DONE_BIT_H;
-    // printing takes time so be wary of transfer rate
-    // printf("length: %d offset %d\n", length, offset);
+	memcpy(&file_buffer[offset], &buffer[HEADER], length);
 
-    // Placeholder processing
-    size_t chunk_start = 0;
-    size_t chunk_length = 0;
+	offset += length;
+	writer++;
 
-    // Process the received buffer
-    while (chunk_start < length) {
-        // Content-Defined Chunking
-        content_defined_chunking(&buffer[HEADER], length, chunk_start, chunk_length);
-
-        unsigned char* chunk_data = &buffer[HEADER + chunk_start];
-
-        // Compute placeholder hash
-        uint32_t chunk_hash = placeholder_hash(chunk_data, chunk_length);
-
-        // Placeholder deduplication (simple hash map)
-        // For simplicity, we're not implementing an actual deduplication mechanism here
-        // In practice, you would check if the chunk_hash exists and handle duplicates
-
-        // Placeholder LZW Encoding
-        unsigned char* compressed_data = nullptr;
-        size_t compressed_size = 0;
-        lzw_encode(chunk_data, chunk_length, compressed_data, compressed_size);
-
-        // Store the processed chunk into the file buffer
-        memcpy(&file[offset], compressed_data, compressed_size);
-        offset += compressed_size;
-
-        chunk_start += chunk_length;
-    }
-
-    writer++;
-
-    // Process remaining packets
+    // Receive premaining ackets
     while (!done) {
-        // reset ring buffer
         if (writer == NUM_PACKETS) {
             writer = 0;
         }
 
         ethernet_timer.start();
-        server.get_packet(input[writer]);
+        server.get_packet(input_buffers[writer]);
         ethernet_timer.stop();
 
-        count++;
+        unsigned char* buffer = input_buffers[writer];
 
-        // get packet
-        unsigned char* buffer = input[writer];
-
-        // decode
+        // Decode packet
         done = buffer[1] & DONE_BIT_L;
         length = buffer[0] | (buffer[1] << 8);
         length &= ~DONE_BIT_H;
-        // printf("length: %d offset %d\n", length, offset);
 
-        // Placeholder processing
-        chunk_start = 0;
-        chunk_length = 0;
+        //printf("Packet %d: Length=%d, Writer Index=%d, Offset=%d\n", count + 1, length, writer, offset);
 
-        // Process the received buffer
-        while (chunk_start < length) {
-            // Content-Defined Chunking
-            content_defined_chunking(&buffer[HEADER], length, chunk_start, chunk_length);
-
-            unsigned char* chunk_data = &buffer[HEADER + chunk_start];
-
-            // Compute placeholder hash
-            uint32_t chunk_hash = placeholder_hash(chunk_data, chunk_length);
-
-            // Placeholder deduplication (simple hash map)
-            // For simplicity, we're not implementing an actual deduplication mechanism here
-
-            // Placeholder LZW Encoding
-            unsigned char* compressed_data = nullptr;
-            size_t compressed_size = 0;
-            lzw_encode(chunk_data, chunk_length, compressed_data, compressed_size);
-
-            // Store the processed chunk into the file buffer
-            memcpy(&file[offset], compressed_data, compressed_size);
-            offset += compressed_size;
-
-            chunk_start += chunk_length;
+        // Ensure buffer does not overflow
+        if (offset + length >= 70000000) {
+            std::cerr << "File buffer overflow! Skipping packet." << std::endl;
+            writer++;
+            count++;
+            continue;
         }
 
+        // Copy received data into 'file_buffer'
+        memcpy(&file_buffer[offset], &buffer[HEADER], length);
+        offset += length;
+        count++;
         writer++;
     }
+    // Optionally save the raw received data to a text file
+    save_to_text_file(file_buffer, offset, "received_output.txt");
 
-    // write file to root and you can use diff tool on board
-    FILE *outfd = fopen("output_cpu.bin", "wb");
+    // Initialize caches for deduplication and compression
+    std::unordered_map<std::string, std::vector<unsigned char>> lzw_cache;
+    std::unordered_set<std::string> hash_table;
+
+    // Process the received file buffer
+    if (!process_packet(file_buffer, offset, lzw_cache, hash_table)) {
+        std::cerr << "Error processing packet!" << std::endl;
+    }
+
+    // Save the processed data to a binary file
+    FILE *outfd = fopen(output_filename, "wb");
     if (outfd == NULL) {
-        perror("Error opening output file");
+        std::cerr << "Error: Could not open" << output_filename << "for writing." << std::endl;
+        // Free allocated resources before exiting
+        for (int i = 0; i < NUM_PACKETS; i++) {
+            free(input_buffers[i]);
+        }
+        free(file_buffer);
         return 1;
     }
-    int bytes_written = fwrite(&file[0], 1, offset, outfd);
-    printf("write file with %d bytes\n", bytes_written);
+
+    size_t bytes_written = fwrite(file_buffer, 1, offset, outfd);
+    if (bytes_written != offset) {
+        std::cerr << "Warning: Not all data was written to the file. Expected " 
+                  << offset << " bytes, but wrote " << bytes_written << " bytes." << std::endl;
+    } else {
+        std::cout << "All data written successfully." << std::endl;
+    }
+    printf("Written file with %zu bytes\n", bytes_written);
     fclose(outfd);
 
+    // Free allocated memory
     for (int i = 0; i < NUM_PACKETS; i++) {
-        free(input[i]);
+        free(input_buffers[i]);
     }
+    free(file_buffer);
 
-    free(file);
+    // Calculate and display throughput
     std::cout << "--------------- Key Throughputs ---------------" << std::endl;
-    float ethernet_latency = ethernet_timer.latency() / 1000.0;
-    float input_throughput = (bytes_written * 8 / 1000000.0) / ethernet_latency; // Mb/s
+    float ethernet_latency = ethernet_timer.latency() / 1000.0f;
+    float input_throughput = (bytes_written * 8.0f / 1000000.0f) / ethernet_latency; // Mb/s
     std::cout << "Input Throughput to Encoder: " << input_throughput << " Mb/s."
               << " (Latency: " << ethernet_latency << "s)." << std::endl;
+
+    std::cout << "-------------------------------------------------" << std::endl;
 
     return 0;
 }

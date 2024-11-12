@@ -1,0 +1,141 @@
+/*
+
+Xilinx Vitis v2020.2.0 (64-bit) [Major: 2020, Minor: 2]
+SW Build 3064172 on 2020-11-18-06:24:19
+
+Process ID (PID): 21296
+License: Customer
+
+Current time: 	Tue Nov 05 21:32:37 EST 2024
+Time zone: 	Eastern Standard Time (America/New_York)
+
+OS: NAME="openSUSE Leap"
+OS Version: 6.4.0-150600.23.25-default
+OS Architecture: amd64
+Available processors (cores): 20
+
+Display: :0
+Screen size: 1920x1080
+Available screens: 1
+Available disk space: 805 GB
+
+Java version: 	11.0.2 64-bit
+Java home: 	/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2
+Java executable location: 	/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/bin/java
+Java initial memory (-Xms): 	64 MB
+Java maximum memory (-Xmx):	 1,024 MB
+
+Java library paths: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/javafx-sdk-11.0.2/lib:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o/SuSE:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/lib/:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/jre11.0.2/lib//server:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o/SuSE:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/lib/lnx64.o:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/tps/lnx64/python-3.8.3/lib:/mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/bin/../lnx64/tools/dot/lib:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+
+Java class paths: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/eclipse/lnx64.o//plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar
+LD_LIBRARY_PATH: /mnt/pollux/software/xilinx/2020.2/Vitis
+
+User name: 	wkun
+User home directory: /mnt/castor/seas_home/w/wkun
+User working directory: /mnt/castor/seas_home/w/wkun/ese532_code/project
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /mnt/pollux/software/xilinx/2020.2/Vitis
+HDI_APPROOT: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+RDI_DATADIR: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/data
+RDI_BINDIR: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2/bin
+
+Vitis preferences directory: /mnt/castor/seas_home/w/wkun/.Xilinx/Vitis/2020.2/
+Vitis workspace directory: /mnt/castor/seas_home/w/wkun/ese532_code/project
+Vitis workspace log file location: /mnt/castor/seas_home/w/wkun/ese532_code/project/.metadata/.log
+Engine tmp dir: 	
+
+Xilinx Environment Variables
+----------------------------
+SDK_HOME: /usr/lib64/jvm/java-17-openjdk-17
+XILINXD_LICENSE_FILE: /mnt/pollux/software/xilinx/.Xilinx/
+XILINX_DSP: 
+XILINX_HLS: /mnt/pollux/software/xilinx/2020.2/Vitis_HLS/2020.2
+XILINX_PLANAHEAD: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_SDK: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_VITIS: /mnt/pollux/software/xilinx/2020.2/Vitis/2020.2
+XILINX_VIVADO: /mnt/pollux/software/xilinx/2020.2/Vivado/2020.2
+XILINX_VIVADO_HLS: /mnt/pollux/software/xilinx/2020.2/Vivado/2020.2
+_RDI_DONT_SET_XILINX_AS_PATH: True
+
+
+Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+selectCheckBox("Skip welcome page next time", Boolean.TRUE, "New Application Project (Create a New Application Project)", "NewAppProjectWizard", "Button.SKIP_WELCOME_PAGE");
+selectButton("Next", "New Application Project (Create a New Application Project)", "NewAppProjectWizard", "Button.NEXT");
+selectButton("Next", "New Application Project (Platform)", "NewAppProjectWizard", "Button.NEXT");
+setTextField("bloom", "New Application Project (Application Project Details)", "NewAppProjectWizard", "Text.APPLICATION_PROJECT_NAME");
+setTextField("bloom", "New Application Project (Application Project Details)", "NewAppProjectWizard", "Text.SYSTEM_PROJECT_NAME");
+selectTreeTable("psu_cortexa53 SMP", "New Application Project (Application Project Details)", "NewAppProjectWizard", "ProjectDetailsPage");
+setTextField("bloom_system", "New Application Project (Application Project Details)", "NewAppProjectWizard", "Text.SYSTEM_PROJECT_NAME");
+selectButton("Next", "New Application Project (Application Project Details)", "NewAppProjectWizard", "Button.NEXT");
+selectButton("Next", "New Application Project (Domain)", "NewAppProjectWizard", "Button.NEXT");
+selectTreeTable("Empty Application", "SW acceleration templates", "New Application Project (Templates)", "NewAppProjectWizard", "TreeViewer.TemplateContentProvider");
+selectButton("Finish", "New Application Project (Templates)", "NewAppProjectWizard", "Button.FINISH");
+activateView("Welcome", "ViewIntroAdapterPart", "CTabItem.WELCOME");
+selectTreeTable("bloom.prj", "bloom_system > bloom", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectCombo("Hardware", "bloom", "SDXSettingsEditor", "ComboViewer.ArrayContentProvider");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("bloom.prj", "bloom_system > bloom", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectToolBarButton("Run", "bloom", "WorkbenchWindow", "ToolItem.RUN");
+selectButton("OK", "Unable To Launch", "MessageDialog", "Button.OK");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("bloom_kernels.prj", "bloom_system > bloom_kernels", EventType.DOUBLE_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectToolBarButton("Add Hardware Function", "bloom_kernels", "CTabItem", "ToolItem.ADD_HARDWARE_FUNCTION");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("src", "bloom_system > bloom", EventType.DOUBLE_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectMenuItem("File", "bloom", "WorkbenchWindow", "MenuItem.FILE");
+selectMenuItem("Import", "bloom", "WorkbenchWindow", "MenuItem.IMPORT");
+selectCheckBox("Hide projects that already exist in the workspace", Boolean.FALSE, "Explorer", "ProjectExplorer", "Button.HIDE_PROJECTS_THAT");
+selectButton("Cancel", "Import Projects (Import Type)", "SdxArchiveImportWizard", "Button.CANCEL");
+selectTreeTable("bloom_system", EventType.POPUP_TRIGGER_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectMenuItem("Import Sources", "Explorer", "ProjectExplorer", "MenuItem.IMPORT_SOURCES");
+selectButton("Browse", "Import Sources (File system)", "FileSystemImportWizard", "Button.BROWSE");
+selectTree("fpga", "Import Sources (File system)", "FileSystemImportWizard", "Tree.FPGA");
+selectButton("Select All", "Import Sources (File system)", "FileSystemImportWizard", "Button.SELECT_ALL");
+selectButton("Browse", "Import Sources (File system)", "FileSystemImportWizard", "Button.BROWSE");
+selectTree("bloom", "Import into Folder", "ContainerSelectionDialog", "Tree.Workspace");
+selectTree("src", "bloom", EventType.DOUBLE_CLICK, "Import into Folder", "ContainerSelectionDialog", "Tree.Workspace");
+selectButton("OK", "Import into Folder", "ContainerSelectionDialog", "Button.OK");
+selectButton("Finish", "Import Sources (File system)", "FileSystemImportWizard", "Button.FINISH");
+activateView("bloom", "bloom/bloom.prj", "SDXSettingsEditor", "CTabItem.BLOOM");
+selectTreeTable("bloom_system", EventType.POPUP_TRIGGER_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectMenuItem("Refresh", "Explorer", "ProjectExplorer", "MenuItem.REFRESH");
+closeView("bloom", "bloom/bloom.prj", "SDXSettingsEditor", "CTabItem.BLOOM");
+closeView("bloom_kernels", "bloom_kernels/bloom_kernels.prj", "SDXSettingsEditor", "CTabItem.BLOOM_KERNELS");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("bloom.prj", "bloom_system > bloom", EventType.DOUBLE_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectCheckBox("When enabled host code will be compiled with debug", Boolean.FALSE, "bloom", "SDXSettingsEditor", "Button.WHEN_ENABLED_HOST");
+selectCheckBox("When enabled host code will be compiled with debug", Boolean.TRUE, "bloom", "SDXSettingsEditor", "Button.WHEN_ENABLED_HOST");
+selectToolBarButton("Run", "bloom", "WorkbenchWindow", "ToolItem.RUN");
+selectButton("OK", "Unable To Launch", "MessageDialog", "Button.OK");
+selectToolBarMenuButton("Run", "bloom", "WorkbenchWindow", "ToolItem.RUN");
+selectToolBarMenuButton("Debug", "bloom", "WorkbenchWindow", "ToolItem.DEBUG");
+activateView("Explorer", "ProjectExplorer", "CTabItem.EXPLORER");
+selectTreeTable("bloom_kernels.prj", "bloom_system > bloom_kernels", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectToolBarButton("Run", "bloom_kernels", "WorkbenchWindow", "ToolItem.RUN");
+selectButton("OK", "Unable To Launch", "MessageDialog", "Button.OK");
+selectTreeTable("bloom.prj", "bloom_system > bloom", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectTreeTable("bloom", "bloom_system", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectTreeTable("bloom_system", "bloom_system", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectToolBarButton("Run", "bloom_system", "WorkbenchWindow", "ToolItem.RUN");
+selectTable("Launch Hardware", "Run As", "LaunchShortcutSelectionDialog", "Table.SELECT_A_WAY_TO_RUN_'BLOOM_SYSTEM'");
+selectButton("OK", "Run As", "LaunchShortcutSelectionDialog", "Button.OK");
+selectToolBarMenuButton("Run", "bloom_system", "WorkbenchWindow", "ToolItem.RUN");
+selectToolBarMenuButton("Build Hardware for project bloom_system", "bloom_system", "WorkbenchWindow", "ToolItem.BUILD_HARDWARE_FOR");
+activateView("Assistant", "SDXAssistantView", "CTabItem.ASSISTANT");
+selectTreeTable("Hardware", "bloom_system > bloom_kernels", "Assistant", "SDXAssistantView", "TreeViewer.AssistantContentProvider");
+selectTreeTable("Hardware", "bloom_system", EventType.POPUP_TRIGGER_CLICK, "Assistant", "SDXAssistantView", "TreeViewer.AssistantContentProvider");
+selectToolBarMenuButton("Run", "bloom", "WorkbenchWindow", "ToolItem.RUN");
+selectMenuItem("1 SystemDebugger_bloom_system", "Assistant", "SDXAssistantView", "MenuItem.1_SYSTEMDEBUGGER_BLOOM_SYSTEM");
+activateView("Progress", "ProgressView", "CTabItem.PROGRESS");
+selectToolBarButton("Cancel Operation", "Progress", "ProgressView", "ToolItem.CANCEL_OPERATION");
+selectMenuItem("File", "bloom", "WorkbenchWindow", "MenuItem.FILE");
+selectMenuItem("Restart", "bloom", "WorkbenchWindow", "MenuItem.RESTART");
+// Exiting Xilinx Vitis with a status code '0' at 11/5/24, 9:46:39 PM EST
+// Elapsed time: 00:14:02
+
